@@ -17,6 +17,7 @@ h1{font-size:clamp(18px,3vw,26px);font-weight:800}
 h1 span{color:var(--acc)}
 button,select{font:inherit;cursor:pointer;border:1px solid var(--bd);background:var(--card);color:var(--fg);border-radius:10px;padding:8px 14px;transition:.2s}
 button:hover{border-color:var(--acc);transform:translateY(-1px)}
+select:disabled{opacity:.4;cursor:not-allowed}sub{font-size:.65em}
 button:disabled{cursor:default}button:disabled:hover{transform:none}
 button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 .wrap{max-width:1400px;margin:auto;overflow-x:auto;padding:12px 10px 18px;perspective:1200px}
@@ -127,7 +128,8 @@ body.sh{padding-bottom:64vh}
 
 <section id="qz" hidden>
  <div class="tabs">
-  <button data-m="ion" class="on">⚡ بار کاتیون/آنیون</button>
+  <button data-m="ion" class="on">⚡ بار یون تک‌اتمی</button>
+  <button data-m="poly">🧪 یون‌های چنداتمی</button>
   <button data-m="name">🔤 نام و نماد</button>
   <button data-m="loc">📍 مکان‌یابی</button>
   <select id="rng"><option value="20">عنصر ۱ تا ۲۰</option><option value="54" selected>عنصر ۱ تا ۵۴</option><option value="118">همه عناصر</option></select>
@@ -279,71 +281,104 @@ $('#lg').onclick=e=>{
 /* flashcard / quiz */
 
 const pool=f=>{const m=+$('#rng').value,r=[];for(let z=1;z<=m;z++)if(f(z))r.push(z);return r};
-const isIon=z=>!OV[z]&&ions(z).length==1&&[0,1,3,5,6].includes(cat(z));
 const notF=z=>!(z>=57&&z<=71)&&!(z>=89&&z<=103);
-const FILT={ion:isIon,name:()=>1,loc:notF};
-let Q={};
-/* هر تب یک چرخه دارد: صف تصادفی عناصر بازه؛ درست = حذف، غلط = رفتن به انتهای صف */
+/* تب یون تک‌اتمی: فقط این موارد [عدد اتمی، بار، سرنخ]؛ بار 0 = یون پایدار تشکیل نمی‌دهد */
+const ION=[[1,1,'فقط در محلول آبی'],[1,-1,'در ترکیب با فلزها'],[3,1],[11,1],[19,1],[37,1],[4,0],[12,2],[20,2],[38,2],[21,3],[39,3],
+ ...[22,23,24,25,26,27,28].flatMap(z=>[[z,2],[z,3]]),
+ [29,1],[29,2],[30,2],[47,1],[5,0],[13,3],[31,3],[6,0],[14,0],[32,0],[50,2],[50,4],[82,2],[82,4],
+ [7,-3],[15,-3],[8,-2],[16,-2],[34,-2],[9,-1],[17,-1],[35,-1],[53,-1]];
+/* تب یون چنداتمی: [فرمول، نام، بار] */
+const POLY=[['OH','هیدروکسید',-1],['NO3','نیترات',-1],['NO2','نیتریت',-1],['CO3','کربنات',-2],['HCO3','هیدروژن کربنات',-1],['PO4','فسفات',-3],['SO4','سولفات',-2],['NH4','آمونیوم',1],
+ ['MnO4','پرمنگنات',-1],['O2','پراکسید',-2],['HCOO','فرمات (متانوات)',-1],['CH3COO','استات (اتانوات)',-1],['CN','سیانید',-1],['SiO4','سیلیکات',-4],['ClO4','پرکلرات',-1],['C6H5COO','بنزوات',-1]];
+const fm=f=>f.replace(/\d+/g,'<sub>$&</sub>'),pf=i=>fm(POLY[i][0])+sg(POLY[i][2]);
+const FIXED={ion:()=>ION.map((_,i)=>i),poly:()=>POLY.map((_,i)=>i)};
+let Q={},lastAsk=0;
+/* هر تب یک چرخه دارد: صف تصادفی؛ درست = حذف، غلط = رفتن به انتهای صف */
 function getQ(){
- const m=+$('#rng').value;
- if(!Q[mode]||Q[mode].m!=m){const l=shuffle(pool(FILT[mode]));Q[mode]={m,queue:l,total:l.length,done:0,wrong:0,miss:{},pos:{}}}
+ const m=FIXED[mode]?0:+$('#rng').value;
+ if(!Q[mode]||Q[mode].m!=m){const l=shuffle(FIXED[mode]?FIXED[mode]():pool(mode=='name'?()=>1:notF));Q[mode]={m,queue:l,total:l.length,done:0,wrong:0,miss:{},pos:{}}}
  return Q[mode]}
 function stat(){
  const q=getQ(),p=q.total?q.done/q.total*100:0;
  $('#stat').innerHTML=`<div class="pb"><i style="width:${p}%"></i></div>${q.done} از ${q.total} تمام شد · باقی‌مانده: ${q.queue.length} · اشتباه: ${q.wrong}`}
-/* چینش گزینه‌ها: اگر عنصر تکرار شود، جای گزینه‌ی درست عوض می‌شود */
-function mix(q,z,arr,ans){
- let o,t=0;do o=shuffle(arr.slice());while(q.pos[z]===o.indexOf(ans)&&t++<30);
- q.pos[z]=o.indexOf(ans);return o}
+/* چینش گزینه‌ها: اگر کارتی تکرار شود، جای گزینه‌ی درست عوض می‌شود */
+function mix(q,k,arr,ans){
+ let o,t=0;do o=shuffle(arr.slice());while(q.pos[k]===o.indexOf(ans)&&t++<30);
+ q.pos[k]=o.indexOf(ans);return o}
+function lbl(it){
+ if(mode=='poly')return`<bdi dir="ltr">${pf(it)}</bdi> (${POLY[it][1]})`;
+ const z=mode=='ion'?ION[it][0]:it,c=mode=='ion'?ION[it][1]:0;
+ return`<bdi dir="ltr">${S[z-1]}${c?sg(c):''}</bdi> (${N[z-1]})${mode=='ion'&&!c?' — بدون یون':''}`}
+const cfgSpan=h=>`<span class="cfg" style="display:inline-block;font-size:14px">${h}</span>`;
+const optBtn=(x,txt,ltr)=>`<button data-v="${x}"${ltr?' style="direction:ltr"':''}>${txt}</button>`;
 function ask(){
+ lastAsk=Date.now();
  const q=getQ();let h='';
+ $('#rng').disabled=!!FIXED[mode];$('#rng').title=FIXED[mode]?'این تب بازه‌ی ثابت دارد':'';
  if(!q.queue.length){
   cur={done:1};
   const top=Object.entries(q.miss).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  h=`<div class="big">🎉</div><div class="q">همه‌ی ${q.total} عنصر این بازه را درست جواب دادی!</div><div class="sub">مجموع اشتباه‌ها: ${q.wrong}</div>`+
-   (top.length?`<div class="fb bad">بیشترین اشتباه:<br>${top.map(([z,n])=>`<bdi dir="ltr">${S[z-1]}</bdi> (${N[z-1]}) — ${n} بار`).join('<br>')}</div>`:`<div class="fb good">بدون هیچ اشتباهی! 👏</div>`)+
+  h=`<div class="big">🎉</div><div class="q">همه‌ی ${q.total} مورد این تب را درست جواب دادی!</div><div class="sub">مجموع اشتباه‌ها: ${q.wrong}</div>`+
+   (top.length?`<div class="fb bad">بیشترین اشتباه:<br>${top.map(([k,n])=>`${lbl(+k)} — ${n} بار`).join('<br>')}</div>`:`<div class="fb good">بدون هیچ اشتباهی! 👏</div>`)+
    `<button id="rs" class="on">شروع دوباره</button>`}
  else{
-  const z=q.queue[0];
+  const it=q.queue[0];
   if(mode=='ion'){
-   const c=ions(z)[0];cur={z,ans:c};
-   const o=mix(q,z,[c,...shuffle([1,2,3,-1,-2,-3].filter(x=>x!=c)).slice(0,3)],c);
-   h=`<div class="q">بار یون پایدار این عنصر چند است؟</div><div class="big">${S[z-1]}</div><div class="sub">${N[z-1]} · Z=${z}</div><div class="opts">${o.map(x=>`<button data-v="${x}" style="direction:ltr">${lab(x)}</button>`).join('')}</div>`}
+   const[z,c,hn]=ION[it],same=ION.filter(x=>x[0]==z).map(x=>x[1]);cur={it,z,ans:c};
+   const d=shuffle([1,2,3,-1,-2,-3].filter(x=>!same.includes(x))).slice(0,3);
+   if(c!==0&&Math.random()<.3)d[0]=0;
+   const o=mix(q,it,[c,...d],c);
+   const hint=hn?`(${hn})`:same.length>1?'آرایش یون: '+cfgSpan((([a,n])=>fc(a,n,1))(ionA(z,c))):'';
+   h=`<div class="q">بار یون پایدار این عنصر چند است؟</div><div class="big">${S[z-1]}</div><div class="sub">${N[z-1]} · Z=${z}</div>${hint?`<div class="sub" style="margin-top:-8px">${hint}</div>`:''}<div class="opts">${o.map(x=>x===0?optBtn(0,'یون پایدار ندارد'):optBtn(x,lab(x),1)).join('')}</div>`}
+  else if(mode=='poly'){
+   const[f,nm,c]=POLY[it],t=Math.random()*3|0;cur={it,t,ans:t==2?c:it};let o;
+   if(t==2){
+    o=mix(q,it,[c,...shuffle([1,2,-1,-2,-3,-4].filter(x=>x!=c)).slice(0,3)],c);
+    h=`<div class="q">بار این یون چند است؟</div><div class="big">${fm(f)}</div><div class="sub">${nm}</div><div class="opts">${o.map(x=>optBtn(x,lab(x),1)).join('')}</div>`}
+   else{
+    o=mix(q,it,[it,...shuffle(POLY.map((_,i)=>i).filter(i=>i!=it)).slice(0,3)],it);
+    h=t==0?`<div class="q">نام این یون چیست؟</div><div class="big">${pf(it)}</div><div class="opts">${o.map(i=>optBtn(i,POLY[i][1])).join('')}</div>`
+          :`<div class="q">فرمول (همراه با بار) این یون کدام است؟</div><div class="big" style="direction:rtl;font-size:34px">${nm}</div><div class="opts">${o.map(i=>optBtn(i,pf(i),1)).join('')}</div>`}}
   else if(mode=='name'){
-   const p=pool(FILT.name),fw=Math.random()<.5;cur={z,ans:z};
-   const o=mix(q,z,[z,...shuffle(p.filter(x=>x!=z)).slice(0,3)],z);
-   h=`<div class="q">${fw?'نام این نماد چیست؟':'نماد شیمیایی این عنصر کدام است؟'}</div><div class="big" style="${fw?'':'direction:rtl'}">${fw?S[z-1]:N[z-1]}</div><div class="opts">${o.map(x=>`<button data-v="${x}" style="${fw?'':'direction:ltr'}">${fw?N[x-1]:S[x-1]}</button>`).join('')}</div>`}
+   const z=it,p=pool(()=>1),fw=Math.random()<.5;cur={it,z,ans:z};
+   const o=mix(q,it,[z,...shuffle(p.filter(x=>x!=z)).slice(0,3)],z);
+   h=`<div class="q">${fw?'نام این نماد چیست؟':'نماد شیمیایی این عنصر کدام است؟'}</div><div class="big" style="${fw?'':'direction:rtl'}">${fw?S[z-1]:N[z-1]}</div><div class="opts">${o.map(x=>optBtn(x,fw?N[x-1]:S[x-1],!fw)).join('')}</div>`}
   else{
-   const[r,c]=pos(z);cur={z,r,c};
+   const z=it,[r,c]=pos(z);cur={it,z,r,c};
    const op=n=>Array.from({length:n},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('');
    h=`<div class="q">عنصر شماره</div><div class="big">${z}</div><div class="sub">دوره و گروه آن کدام است؟</div>
    <div class="lr"><label>دوره<select id="sp">${op(7)}</select></label><label>گروه<select id="sg">${op(18)}</select></label></div><button id="ok" class="on">ثبت پاسخ</button>`}}
  const cd=$('#card');cd.style.animation='none';cd.offsetWidth;cd.style.animation='';cd.innerHTML=h;stat()}
 function fin(ok,exp){
- const q=getQ(),z=cur.z;cur.done=1;
- if(ok){q.queue.shift();q.done++}else{q.queue.push(q.queue.shift());q.wrong++;q.miss[z]=(q.miss[z]||0)+1}
+ const q=getQ(),k=cur.it;cur.done=1;
+ if(ok){q.queue.shift();q.done++}else{q.queue.push(q.queue.shift());q.wrong++;q.miss[k]=(q.miss[k]||0)+1}
  stat();
  $('#card').insertAdjacentHTML('beforeend',`<div class="fb ${ok?'good':'bad'}"><b>${ok?'آفرین! درسته ✓ از چرخه خارج شد':'اشتباه بود ✗ به انتهای چرخه برگشت'}</b><br>${exp}</div><button id="nx" class="on">${q.queue.length?'سؤال بعدی ←':'مشاهده نتیجه 🎉'}</button>`)}
 $('#card').onclick=e=>{
  const b=e.target.closest('button');if(!b)return;
+ if(Date.now()-lastAsk<300)return;
  if(b.id=='nx')return ask();
  if(b.id=='rs'){delete Q[mode];return ask()}
  if(cur.done)return;
- const z=cur.z,s=S[z-1];
  if(b.dataset.v!=null){
   const ok=+b.dataset.v==cur.ans;
   document.querySelectorAll('.opts button').forEach(x=>{x.disabled=true;if(+x.dataset.v==cur.ans)x.classList.add('good')});
   if(!ok)b.classList.add('bad');
   let exp;
-  if(mode=='ion'){const c=cur.ans,[ia,n]=ionA(z,c);exp=`${N[z-1]} (<bdi dir="ltr">${s}</bdi>) با ${c>0?'از دست دادن':'گرفتن'} ${Math.abs(c)} الکترون به آرایش <span class="cfg" style="display:inline-block;font-size:14px">${fc(ia,n,1)}</span> می‌رسد و ${c>0?'کاتیون':'آنیون'} <b class="ion ${c>0?'c':'a'}">${s}${sg(c)}</b> می‌شود.`}
-  else exp=`<b dir="ltr">${s}</b> = ${N[z-1]} (عدد اتمی ${z})`;
+  if(mode=='ion'){
+   const[z,c]=ION[cur.it],s=S[z-1],nm=`${N[z-1]} (<bdi dir="ltr">${s}</bdi>)`;
+   if(c===0)exp=`${nm} یون پایدار تشکیل نمی‌دهد؛ ترکیب‌های آن عمدتاً کووالانسی است.`;
+   else if(z==1)exp=c>0?`هیدروژن با از دست دادن یک الکترون <b class="ion c">H<sup>+</sup></b> می‌شود (فقط در محلول آبی).`:`هیدروژن با گرفتن یک الکترون به آرایش <b>[He]</b> می‌رسد و در ترکیب با فلزها <b class="ion a">H<sup>−</sup></b> (هیدرید) می‌شود.`;
+   else{const[ia,n]=ionA(z,c);exp=`${nm} با ${c>0?'از دست دادن':'گرفتن'} ${Math.abs(c)} الکترون به آرایش ${cfgSpan(fc(ia,n,1))} می‌رسد و ${c>0?'کاتیون':'آنیون'} <b class="ion ${c>0?'c':'a'}">${s}${sg(c)}</b> می‌شود.`}}
+  else if(mode=='poly'){const[f,nm,c]=POLY[cur.it];exp=`<b class="ion ${c>0?'c':'a'}">${fm(f)}${sg(c)}</b> = ${nm} (بار ${lab(c)})`}
+  else exp=`<b dir="ltr">${S[cur.z-1]}</b> = ${N[cur.z-1]} (عدد اتمی ${cur.z})`;
   fin(ok,exp)}
  if(b.id=='ok'){
-  const p=+$('#sp').value,g=+$('#sg').value,ok=p==cur.r&&g==cur.c;
+  const z=cur.z,s=S[z-1],p=+$('#sp').value,g=+$('#sg').value,ok=p==cur.r&&g==cur.c;
   fin(ok,`${N[z-1]} (<bdi dir="ltr">${s}</bdi>): دوره <b>${cur.r}</b> و گروه <b>${cur.c}</b>.<br>دوره = تعداد لایه‌های الکترونی، گروه از الکترون‌های ظرفیت مشخص می‌شود.`)}};
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
  mode=b.dataset.m;document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x==b));ask()});
-$('#rng').onchange=()=>{Q={};ask()};
+$('#rng').onchange=()=>{delete Q.name;delete Q.loc;ask()};
 $('#fl').onclick=function(){
  const q=$('#qz').hidden;$('#qz').hidden=!q;$('#tb').hidden=q;hide();
  this.classList.toggle('on',q);this.textContent=q?'🔬 بازگشت به جدول':'🎴 حالت فلش‌کارت';
