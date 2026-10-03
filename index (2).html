@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#4f6bff">
+<title>جدول تناوبی تعاملی</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f7fa;--fg:#1b1d24;--mut:#6b7080;--card:#fff;--bd:#e3e5ec;--acc:#4f6bff;--L:92%;--S:80%}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1016;--fg:#e8eaf2;--mut:#8f95a8;--card:#171a23;--bd:#2a2e3b;--L:21%;--S:45%}}
+*{box-sizing:border-box;margin:0}
+body{font-family:Vazirmatn,Tahoma,sans-serif;background:var(--bg);color:var(--fg);padding:14px;min-height:100vh}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;max-width:1400px;margin:0 auto 12px}
+h1{font-size:clamp(18px,3vw,26px);font-weight:800}
+h1 span{color:var(--acc)}
+button,select{font:inherit;cursor:pointer;border:1px solid var(--bd);background:var(--card);color:var(--fg);border-radius:10px;padding:8px 14px;transition:.2s}
+button:hover{border-color:var(--acc);transform:translateY(-1px)}
+button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.wrap{max-width:1400px;margin:auto;overflow-x:auto;padding:8px 4px 18px;perspective:1200px}
+#pt{direction:ltr;display:grid;grid-template-columns:repeat(18,minmax(36px,1fr));gap:4px;min-width:700px}
+.el{aspect-ratio:1;border-radius:8px;background:hsl(var(--h) var(--S) var(--L));border:1px solid hsl(var(--h) 40% 55%/.35);
+ display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;
+ font-size:clamp(9px,1.1vw,13px);animation:in .5s backwards;transition:transform .2s,box-shadow .2s,opacity .25s}
+.el small{position:absolute;top:2px;left:4px;font-size:.62em;opacity:.65}
+.el b{font-size:1.45em;font-weight:800;line-height:1.1}
+.el i{font-style:normal;font-size:.55em;opacity:.8;display:none}
+@media(min-width:900px){.el i{display:block}}
+.el:hover{transform:translateZ(40px) scale(1.18);z-index:5;box-shadow:0 10px 24px #0004}
+.ph{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:.6em;color:var(--mut);border:1px dashed var(--bd);border-radius:8px}
+.dim{opacity:.15}
+@keyframes in{from{opacity:0;transform:translateY(14px) rotateX(45deg)}}
+.lg{max-width:1400px;margin:0 auto 6px;display:flex;flex-wrap:wrap;gap:6px;font-size:12px}
+.lg span{padding:3px 10px;border-radius:99px;cursor:pointer;background:hsl(var(--h) var(--S) var(--L));border:1px solid transparent;transition:.2s}
+.lg span.a{border-color:var(--fg)}
+/* popup */
+#pop{position:fixed;z-index:50;width:340px;max-width:calc(100vw - 20px);background:var(--card);border:1px solid var(--bd);border-radius:18px;
+ padding:14px;box-shadow:0 20px 50px #0005;pointer-events:none;opacity:0;transform:translateY(8px) scale(.97);transition:opacity .18s,transform .18s;font-size:13px}
+#pop.show{opacity:1;transform:none}
+@media(hover:none),(max-width:700px){#pop{left:10px!important;right:10px;top:auto!important;bottom:10px;width:auto;max-width:none;pointer-events:auto;max-height:72vh;overflow:auto}}
+.hd{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+.bohr{width:112px;height:112px;flex:none;perspective:320px}
+.bohr svg{width:100%;height:100%;animation:tilt 14s linear infinite;color:var(--mut)}
+@keyframes tilt{from{transform:rotateX(56deg) rotateY(-12deg) rotateZ(0)}to{transform:rotateX(56deg) rotateY(-12deg) rotateZ(360deg)}}
+@keyframes rot{to{transform:rotate(360deg)}}
+.bohr svg g{transform-origin:0 0}
+.nuc{animation:pl 1.6s ease-in-out infinite alternate}
+@keyframes pl{to{r:9}}
+.zz{font-size:12px;color:var(--mut)}
+.sy{font-size:38px;font-weight:800;line-height:1;direction:ltr;text-align:right}
+.nm{font-size:17px;font-weight:600}
+.tag{display:inline-block;font-size:11px;padding:2px 9px;border-radius:99px;margin-top:4px}
+.r{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed var(--bd)}
+.r span:first-child{color:var(--mut)}
+.cf{margin:8px 0 2px;font-size:11px;color:var(--mut)}
+.cfg{direction:ltr;text-align:left;font-size:14px;line-height:1.7;font-weight:600}
+.s{color:#3b82f6}.p{color:#ef4444}.d{color:#16a34a}.f{color:#d97706}.ng{color:var(--mut)}
+sup{font-size:.7em}
+.ft{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:8px}
+.ion{display:inline-block;padding:2px 8px;border-radius:8px;margin:2px;font-weight:600;direction:ltr}
+.ion.c{background:#ef444422;color:#ef4444}.ion.a{background:#3b82f622;color:#3b82f6}
+.lw{width:70px;height:70px;flex:none}
+/* quiz */
+#qz{max-width:560px;margin:10px auto;perspective:1000px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:10px}
+#stat{text-align:center;color:var(--mut);font-size:13px;margin-bottom:10px}
+#card{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:22px;text-align:center;animation:fl .55s;box-shadow:0 10px 30px #0002}
+@keyframes fl{from{transform:rotateY(-90deg);opacity:0}}
+.q{color:var(--mut);margin-bottom:6px}
+.big{font-size:56px;font-weight:800;direction:ltr;line-height:1.2}
+.sub{color:var(--mut);margin-bottom:14px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.opts button{padding:12px;font-size:16px}
+button.good{background:#16a34a;color:#fff;border-color:#16a34a}
+button.bad{background:#ef4444;color:#fff;border-color:#ef4444}
+.fb{margin:14px 0 10px;padding:10px;border-radius:12px;font-size:14px;line-height:1.8}
+.fb.good{background:#16a34a22}.fb.bad{background:#ef444422}
+.lr{display:flex;gap:10px;justify-content:center;margin:12px 0;flex-wrap:wrap}
+.lr label{font-size:13px;color:var(--mut);display:flex;flex-direction:column;gap:4px}
+footer{text-align:center;color:var(--mut);font-size:12px;margin-top:6px}
+</style>
+</head>
+<body>
+<header>
+ <h1>جدول تناوبی <span>تعاملی</span></h1>
+ <button id="fl">🎴 حالت فلش‌کارت</button>
+</header>
+
+<div id="tb">
+ <div class="lg" id="lg"></div>
+ <div class="wrap"><div id="pt"></div></div>
+ <footer>موس را روی هر خانه ببرید (در موبایل: لمس کنید)</footer>
+</div>
+
+<section id="qz" hidden>
+ <div class="tabs">
+  <button data-m="ion" class="on">⚡ بار کاتیون/آنیون</button>
+  <button data-m="name">🔤 نام و نماد</button>
+  <button data-m="loc">📍 مکان‌یابی</button>
+  <select id="rng"><option value="20">عنصر ۱ تا ۲۰</option><option value="54" selected>عنصر ۱ تا ۵۴</option><option value="118">همه عناصر</option></select>
+ </div>
+ <div id="stat"></div>
+ <div id="card"></div>
+</section>
+<div id="pop"></div>
+
+<script>
+const S="H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og".split(' ');
+const N="هیدروژن هلیم لیتیم برلیم بور کربن نیتروژن اکسیژن فلوئور نئون سدیم منیزیم آلومینیوم سیلیسیم فسفر گوگرد کلر آرگون پتاسیم کلسیم اسکاندیم تیتانیم وانادیم کروم منگنز آهن کبالت نیکل مس روی گالیم ژرمانیم آرسنیک سلنیم برم کریپتون روبیدیم استرانسیم ایتریم زیرکونیم نیوبیم مولیبدن تکنسیم روتنیم رودیم پالادیم نقره کادمیم ایندیم قلع آنتیموان تلوریم ید زنون سزیم باریم لانتانیم سریم پرازئودیمیم نئودیمیم پرومتیم ساماریم یوروپیم گادولینیم تربیم دیسپروزیم هولمیم اربیم تولیم ایتربیم لوتتیم هافنیم تانتال تنگستن رنیم اسمیم ایریدیم پلاتین طلا جیوه تالیم سرب بیسموت پولونیم آستاتین رادون فرانسیم رادیم اکتینیم توریم پروتاکتینیم اورانیم نپتونیم پلوتونیم آمریسیم کوریم برکلیم کالیفرنیم اینشتینیم فرمیم مندلویم نوبلیم لورنسیم رادرفوردیم دوبنیم سیبورگیم بوریم هاسیم مایتنریم دارمشتادیم رونتگنیم کوپرنیسیم نیهونیم فلروویم موسکویم لیورموریم تنسین اوگانسون".split(' ');
+const M=[1.008,4.003,6.94,9.012,10.81,12.011,14.007,15.999,18.998,20.18,22.99,24.305,26.982,28.085,30.974,32.06,35.45,39.95,39.098,40.078,44.956,47.867,50.942,51.996,54.938,55.845,58.933,58.693,63.546,65.38,69.723,72.63,74.922,78.971,79.904,83.798,85.468,87.62,88.906,91.224,92.906,95.95,98,101.07,102.91,106.42,107.87,112.41,114.82,118.71,121.76,127.6,126.9,131.29,132.91,137.33,138.91,140.12,140.91,144.24,145,150.36,151.96,157.25,158.93,162.5,164.93,167.26,168.93,173.05,174.97,178.49,180.95,183.84,186.21,190.23,192.22,195.08,196.97,200.59,204.38,207.2,208.98,209,210,222,223,226,227,232.04,231.04,238.03,237,244,243,247,247,251,252,257,258,259,266,267,268,269,270,277,278,281,282,285,286,289,290,293,294,294];
+const CAT=[['فلز قلیایی',350],['قلیایی خاکی',28],['فلز واسطه',52],['پس‌واسطه',150],['شبه‌فلز',175],['نافلز',200],['هالوژن',225],['گاز نجیب',265],['لانتانید',305],['اکتینید',330]];
+const ORD=['1s','2s','2p','3s','3p','4s','3d','4p','5s','4d','5p','6s','4f','5d','6p','7s','5f','6d','7p'];
+const CAP={s:2,p:6,d:10,f:14};
+const EXC={24:['4s','3d',1],29:['4s','3d',1],41:['5s','4d',1],42:['5s','4d',1],44:['5s','4d',1],45:['5s','4d',1],46:['5s','4d',2],47:['5s','4d',1],57:['4f','5d',1],58:['4f','5d',1],64:['4f','5d',1],78:['6s','5d',1],79:['6s','5d',1],89:['5f','6d',1],90:['5f','6d',2],91:['5f','6d',1],92:['5f','6d',1],93:['5f','6d',1],96:['5f','6d',1],103:['6d','7p',1]};
+const OV={1:[1,-1],6:[4,-4],14:[4,-4],15:[-3,3,5],22:[4],24:[3,6],25:[2,4,7],26:[2,3],27:[2,3],28:[2],29:[1,2],30:[2],32:[4],33:[-3,3],34:[-2],47:[1],48:[2],50:[2,4],51:[3,5],78:[2,4],79:[1,3],80:[1,2],81:[1,3],82:[2,4],83:[3],84:[2,4]};
+const $=s=>document.querySelector(s),rnd=a=>a[Math.random()*a.length|0],shuffle=a=>a.sort(()=>Math.random()-.5);
+const inL=(z,l)=>l.includes(z);
+
+function cat(z){
+ if(z>=57&&z<=71)return 8;if(z>=89&&z<=103)return 9;
+ if(inL(z,[2,10,18,36,54,86,118]))return 7;if(inL(z,[9,17,35,53,85,117]))return 6;
+ if(inL(z,[5,14,32,33,51,52]))return 4;if(inL(z,[1,6,7,8,15,16,34]))return 5;
+ if(inL(z,[3,11,19,37,55,87]))return 0;if(inL(z,[4,12,20,38,56,88]))return 1;
+ if(inL(z,[13,31,49,50,81,82,83,84,113,114,115,116]))return 3;return 2}
+function pos(z){
+ if(z==1)return[1,1];if(z==2)return[1,18];
+ if(z<=4)return[2,z-2];if(z<=10)return[2,z+8];
+ if(z<=12)return[3,z-10];if(z<=18)return[3,z];
+ if(z<=36)return[4,z-18];if(z<=54)return[5,z-36];
+ if(z<=56)return[6,z-54];if(z<=71)return[9,z-54];
+ if(z<=86)return[6,z-68];if(z<=88)return[7,z-86];
+ if(z<=103)return[10,z-86];return[7,z-100]}
+const period=z=>{const r=pos(z)[0];return r==9?6:r==10?7:r};
+function cfg(n,z){
+ const a=ORD.map(()=>0);
+ for(let i=0;i<ORD.length&&n>0;i++){a[i]=Math.min(CAP[ORD[i][1]],n);n-=a[i]}
+ const e=z&&EXC[z];if(e){a[ORD.indexOf(e[0])]-=e[2];a[ORD.indexOf(e[1])]+=e[2]}
+ return a}
+const tok=(i,e)=>`<span class="${ORD[i][1]}">${ORD[i]}<sup>${e}</sup></span>`;
+function fc(a,n,ion){
+ let ce=-1,nm='';
+ for(const[g,i]of[[86,14],[54,10],[36,7],[18,4],[10,2],[2,0]])if(ion?g<=n:g<n){ce=i;nm=S[g-1];break}
+ let t=ce>=0?`<span class="ng">[${nm}]</span> `:'';
+ a.forEach((e,i)=>{if(i>ce&&e)t+=tok(i,e)+' '});
+ return t||'—'}
+function ions(z){
+ if(OV[z])return OV[z];const k=cat(z);if(k==7)return[];if(k==8)return[3];if(k==9)return[3,4];
+ const c=pos(z)[1];if(c<3)return[c];if(c==13)return[3];if(c==15)return[-3];if(c==16)return[-2];if(c==17)return[-1];
+ return k==2?[2,3]:[]}
+const sg=c=>`<sup>${Math.abs(c)>1?Math.abs(c):''}${c>0?'+':'−'}</sup>`;
+const lab=c=>(c>0?'+':'−')+Math.abs(c);
+function valence(z,a){
+ const k=cat(z),c=pos(z)[1];
+ if(z==2)return 2;
+ if(k==2||k>=8){let v=0;[0,1,3,5,8,11,15].forEach(i=>{if(a[i])v=a[i]});return v}
+ return c<3?c:c-10}
+function lew(s,n,h){
+ const sd=[0,0,0,0],P=[[0,-17],[17,0],[0,17],[-17,0]];let d='';
+ for(let i=0;i<n&&i<8;i++)sd[i%4]++;
+ sd.forEach((m,k)=>{const[x,y]=P[k];for(let j=0;j<m;j++){const o=m==2?(j?5:-5):0;d+=`<circle cx="${k%2?x:x+o}" cy="${k%2?y+o:y}" r="2.7"/>`}});
+ return`<svg viewBox="-30 -30 60 60" class="lw"><text y="1" text-anchor="middle" dominant-baseline="middle" font-size="18" font-weight="800" fill="currentColor">${s}</text><g fill="hsl(${h} 85% 50%)">${d}</g></svg>`}
+function bohr(a,h){
+ const sh=[];ORD.forEach((o,i)=>sh[o[0]-1]=(sh[o[0]-1]||0)+a[i]);
+ const n=sh.length,st=n>1?Math.min(13,40/(n-1)):0;let g='';
+ sh.forEach((e,i)=>{
+  const r=14+i*st;let d='';
+  for(let j=0;j<e;j++){const t=2*Math.PI*j/e;d+=`<circle cx="${(r*Math.cos(t)).toFixed(1)}" cy="${(r*Math.sin(t)).toFixed(1)}" r="${e>18?1.7:2.4}"/>`}
+  g+=`<circle r="${r}" fill="none" stroke="currentColor" opacity=".3"/><g style="animation:rot ${3+i*1.6}s linear infinite ${i%2?'reverse':''}">${d}</g>`});
+ return`<div class="bohr"><svg viewBox="-60 -60 120 120"><g fill="hsl(${h} 85% 55%)">${g}</g><circle class="nuc" r="7" fill="hsl(${h} 90% 58%)"/></svg></div>`}
+function info(z){
+ const s=S[z-1],k=cat(z),h=CAT[k][1],[r,c]=pos(z),f=r>8,a=cfg(z,z),io=ions(z),v=valence(z,a),main=![2,8,9].includes(k);
+ const st=z>=104?'نامشخص':inL(z,[1,2,7,8,9,10,17,18,36,54,86])?'گاز':inL(z,[35,80])?'مایع':'جامد';
+ let ic=io.length?io.map(x=>`<span class="ion ${x>0?'c':'a'}">${s}${sg(x)}</span>`).join(''):'<span class="ng">تشکیل یون پایدار نمی‌دهد</span>';
+ let ie='';
+ if(main)io.filter(x=>Math.abs(x)<=3).slice(0,2).forEach(x=>{const n=z-x;ie+=`<div class="cfg">${s}${sg(x)}: ${fc(cfg(n,0),n,1)}</div>`});
+ return`<div class="hd">${bohr(a,h)}<div><div class="zz">عدد اتمی ${z}</div><div class="sy" style="color:hsl(${h} 80% 55%)">${s}</div><div class="nm">${N[z-1]}</div>
+ <span class="tag" style="background:hsl(${h} 70% 50%/.2);color:hsl(${h} 80% 50%)">${CAT[k][0]}</span></div></div>
+ <div class="r"><span>جرم اتمی</span><b>${M[z-1]}</b></div>
+ <div class="r"><span>دوره / گروه</span><b>${period(z)} / ${f?'f-بلوک':c}</b></div>
+ <div class="r"><span>حالت (دمای اتاق)</span><b>${st}</b></div>
+ <div class="r"><span>الکترون ظرفیت</span><b>${v}</b></div>
+ <div class="cf">آرایش الکترونی ${EXC[z]?'★ (استثنا)':''}</div><div class="cfg">${fc(a,z)}</div>
+ <div class="cf">یون‌ها (کاتیون قرمز، آنیون آبی)</div><div>${ic}</div>${ie}
+ <div class="ft"><div class="cf" style="margin:0">ساختار لوییس (نقطه‌ای)<br>${main?'نقطه = الکترون ظرفیت':'نقطه = الکترون s ظرفیت'}</div>${lew(s,v,h)}</div>`}
+
+/* build table */
+const pt=$('#pt'),pop=$('#pop');
+for(let z=1;z<=118;z++){
+ const[r,c]=pos(z),k=cat(z),e=document.createElement('div');
+ e.className='el';e.dataset.k=k;
+ e.style.cssText=`--h:${CAT[k][1]};grid-row:${r};grid-column:${c};animation-delay:${(r+c)*28}ms`;
+ e.innerHTML=`<small>${z}</small><b>${S[z-1]}</b><i>${N[z-1]}</i>`;
+ e.onmouseenter=e.onclick=()=>show(z,e);
+ e.onmouseleave=()=>{if(matchMedia('(hover:hover)').matches)pop.classList.remove('show')};
+ pt.appendChild(e)}
+[[6,3,'57–71'],[7,3,'89–103']].forEach(([r,c,t])=>{const d=document.createElement('div');d.className='ph';d.style.cssText=`grid-row:${r};grid-column:${c}`;d.textContent=t;pt.appendChild(d)});
+function show(z,el){
+ pop.innerHTML=info(z);pop.classList.add('show');
+ if(matchMedia('(hover:none),(max-width:700px)').matches)return;
+ const r=el.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight;
+ let x=Math.min(Math.max(10,r.left+r.width/2-w/2),innerWidth-w-10),y=r.bottom+10;
+ if(y+h>innerHeight-10)y=Math.max(10,r.top-h-10);
+ pop.style.left=x+'px';pop.style.top=y+'px'}
+document.addEventListener('click',e=>{if(!e.target.closest('.el,#pop'))pop.classList.remove('show')});
+
+/* legend filter */
+let act=-1;
+$('#lg').innerHTML=CAT.map((c,i)=>`<span style="--h:${c[1]}" data-i="${i}">${c[0]}</span>`).join('');
+$('#lg').onclick=e=>{
+ const s=e.target.closest('span');if(!s)return;
+ act=act==+s.dataset.i?-1:+s.dataset.i;
+ document.querySelectorAll('#lg span').forEach(x=>x.classList.toggle('a',+x.dataset.i==act));
+ document.querySelectorAll('.el').forEach(x=>x.classList.toggle('dim',act>=0&&+x.dataset.k!=act))};
+
+/* flashcard / quiz */
+let mode='ion',sc={r:0,w:0,s:0},cur={};
+const pool=f=>{const m=+$('#rng').value,r=[];for(let z=1;z<=m;z++)if(f(z))r.push(z);return r};
+const isIon=z=>!OV[z]&&ions(z).length==1&&[0,1,3,5,6].includes(cat(z));
+const notF=z=>!(z>=57&&z<=71)&&!(z>=89&&z<=103);
+function stat(){$('#stat').textContent=`درست: ${sc.r}  ·  غلط: ${sc.w}  ·  پیاپی: ${sc.s} 🔥`}
+function ask(){
+ let h='',z;
+ if(mode=='ion'){
+  z=rnd(pool(isIon));const c=ions(z)[0];cur={z,ans:c};
+  const o=shuffle([c,...shuffle([1,2,3,-1,-2,-3].filter(x=>x!=c)).slice(0,3)]);
+  h=`<div class="q">بار یون پایدار این عنصر چند است؟</div><div class="big">${S[z-1]}</div><div class="sub">${N[z-1]} · Z=${z}</div><div class="opts">${o.map(x=>`<button data-v="${x}">${lab(x)}</button>`).join('')}</div>`}
+ else if(mode=='name'){
+  const p=pool(()=>1),fw=Math.random()<.5;z=rnd(p);cur={z,ans:z};
+  const o=shuffle([z,...shuffle(p.filter(x=>x!=z)).slice(0,3)]);
+  h=`<div class="q">${fw?'نام این نماد چیست؟':'نماد شیمیایی این عنصر کدام است؟'}</div><div class="big" style="${fw?'':'direction:rtl'}">${fw?S[z-1]:N[z-1]}</div><div class="opts">${o.map(x=>`<button data-v="${x}" style="${fw?'':'direction:ltr'}">${fw?N[x-1]:S[x-1]}</button>`).join('')}</div>`}
+ else{
+  z=rnd(pool(notF));const[r,c]=pos(z);cur={z,r,c};
+  const op=n=>Array.from({length:n},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('');
+  h=`<div class="q">عنصر شماره</div><div class="big">${z}</div><div class="sub">دوره و گروه آن کدام است؟</div>
+  <div class="lr"><label>دوره<select id="sp">${op(7)}</select></label><label>گروه<select id="sg">${op(18)}</select></label></div><button id="ok" class="on">ثبت پاسخ</button>`}
+ const cd=$('#card');cd.style.animation='none';cd.offsetWidth;cd.style.animation='';cd.innerHTML=h;stat()}
+function fin(ok,exp){
+ cur.done=1;ok?(sc.r++,sc.s++):(sc.w++,sc.s=0);stat();
+ $('#card').insertAdjacentHTML('beforeend',`<div class="fb ${ok?'good':'bad'}"><b>${ok?'آفرین! درسته ✓':'اشتباه بود ✗'}</b><br>${exp}</div><button id="nx" class="on">سؤال بعدی ←</button>`)}
+$('#card').onclick=e=>{
+ const b=e.target.closest('button');if(!b)return;
+ if(b.id=='nx')return ask();
+ if(cur.done)return;
+ const z=cur.z,s=S[z-1];
+ if(b.dataset.v!=null){
+  const ok=+b.dataset.v==cur.ans;
+  document.querySelectorAll('.opts button').forEach(x=>{x.disabled=true;if(+x.dataset.v==cur.ans)x.classList.add('good')});
+  if(!ok)b.classList.add('bad');
+  let exp;
+  if(mode=='ion'){const c=cur.ans,n=z-c;exp=`${N[z-1]} (${s}) با ${c>0?'از دست دادن':'گرفتن'} ${Math.abs(c)} الکترون به آرایش ${fc(cfg(n,0),n,1)} می‌رسد و ${c>0?'کاتیون':'آنیون'} <b>${s}${sg(c)}</b> می‌شود.`}
+  else exp=`<b dir="ltr">${s}</b> = ${N[z-1]} (عدد اتمی ${z})`;
+  fin(ok,exp)}
+ if(b.id=='ok'){
+  const p=+$('#sp').value,g=+$('#sg').value,ok=p==cur.r&&g==cur.c;
+  fin(ok,`${N[z-1]} (${s}): دوره <b>${cur.r}</b> و گروه <b>${cur.c}</b>.<br>دوره = تعداد لایه‌های الکترونی، گروه از الکترون‌های ظرفیت مشخص می‌شود.`)}};
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
+ mode=b.dataset.m;document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x==b));ask()});
+$('#rng').onchange=ask;
+$('#fl').onclick=function(){
+ const q=$('#qz').hidden;$('#qz').hidden=!q;$('#tb').hidden=q;pop.classList.remove('show');
+ this.classList.toggle('on',q);this.textContent=q?'🔬 بازگشت به جدول':'🎴 حالت فلش‌کارت';
+ if(q)ask()};
+</script>
+</body>
+</html>
