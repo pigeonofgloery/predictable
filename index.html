@@ -291,7 +291,8 @@ const ION=[[1,1,'فقط در محلول آبی'],[1,-1,'در ترکیب با ف�
 const POLY=[['OH','هیدروکسید',-1],['NO3','نیترات',-1],['NO2','نیتریت',-1],['CO3','کربنات',-2],['HCO3','هیدروژن کربنات',-1],['PO4','فسفات',-3],['SO4','سولفات',-2],['NH4','آمونیوم',1],
  ['MnO4','پرمنگنات',-1],['O2','پراکسید',-2],['HCOO','فرمات (متانوات)',-1],['CH3COO','استات (اتانوات)',-1],['CN','سیانید',-1],['SiO4','سیلیکات',-4],['ClO4','پرکلرات',-1],['C6H5COO','بنزوات',-1]];
 const fm=f=>f.replace(/\d+/g,'<sub>$&</sub>'),pf=i=>fm(POLY[i][0])+sg(POLY[i][2]);
-const FIXED={ion:()=>ION.map((_,i)=>i),poly:()=>POLY.map((_,i)=>i)};
+const FIXED={ion:()=>ION.map((_,i)=>i),poly:()=>POLY.flatMap((_,i)=>[0,1,2].map(t=>i*3+t))};
+const PT=['فرمول←نام','نام←فرمول','بار یون'];
 let Q={},lastAsk=0;
 /* هر تب یک چرخه دارد: صف تصادفی؛ درست = حذف، غلط = رفتن به انتهای صف */
 function getQ(){
@@ -306,7 +307,7 @@ function mix(q,k,arr,ans){
  let o,t=0;do o=shuffle(arr.slice());while(q.pos[k]===o.indexOf(ans)&&t++<30);
  q.pos[k]=o.indexOf(ans);return o}
 function lbl(it){
- if(mode=='poly')return`<bdi dir="ltr">${pf(it)}</bdi> (${POLY[it][1]})`;
+ if(mode=='poly'){const i=it/3|0;return`<bdi dir="ltr">${pf(i)}</bdi> (${POLY[i][1]}) · ${PT[it%3]}`}
  const z=mode=='ion'?ION[it][0]:it,c=mode=='ion'?ION[it][1]:0;
  return`<bdi dir="ltr">${S[z-1]}${c?sg(c):''}</bdi> (${N[z-1]})${mode=='ion'&&!c?' — بدون یون':''}`}
 const cfgSpan=h=>`<span class="cfg" style="display:inline-block;font-size:14px">${h}</span>`;
@@ -331,14 +332,14 @@ function ask(){
    const hint=hn?`(${hn})`:same.length>1?'آرایش یون: '+cfgSpan((([a,n])=>fc(a,n,1))(ionA(z,c))):'';
    h=`<div class="q">بار یون پایدار این عنصر چند است؟</div><div class="big">${S[z-1]}</div><div class="sub">${N[z-1]} · Z=${z}</div>${hint?`<div class="sub" style="margin-top:-8px">${hint}</div>`:''}<div class="opts">${o.map(x=>x===0?optBtn(0,'یون پایدار ندارد'):optBtn(x,lab(x),1)).join('')}</div>`}
   else if(mode=='poly'){
-   const[f,nm,c]=POLY[it],t=Math.random()*3|0;cur={it,t,ans:t==2?c:it};let o;
+   const i=it/3|0,t=it%3,[f,nm,c]=POLY[i];cur={it,i,t,ans:t==2?c:i};let o;
    if(t==2){
     o=mix(q,it,[c,...shuffle([1,2,-1,-2,-3,-4].filter(x=>x!=c)).slice(0,3)],c);
     h=`<div class="q">بار این یون چند است؟</div><div class="big">${fm(f)}</div><div class="sub">${nm}</div><div class="opts">${o.map(x=>optBtn(x,lab(x),1)).join('')}</div>`}
    else{
-    o=mix(q,it,[it,...shuffle(POLY.map((_,i)=>i).filter(i=>i!=it)).slice(0,3)],it);
-    h=t==0?`<div class="q">نام این یون چیست؟</div><div class="big">${pf(it)}</div><div class="opts">${o.map(i=>optBtn(i,POLY[i][1])).join('')}</div>`
-          :`<div class="q">فرمول (همراه با بار) این یون کدام است؟</div><div class="big" style="direction:rtl;font-size:34px">${nm}</div><div class="opts">${o.map(i=>optBtn(i,pf(i),1)).join('')}</div>`}}
+    o=mix(q,it,[i,...shuffle(POLY.map((_,k)=>k).filter(k=>k!=i)).slice(0,3)],i);
+    h=t==0?`<div class="q">نام این یون چیست؟</div><div class="big">${pf(i)}</div><div class="opts">${o.map(k=>optBtn(k,POLY[k][1])).join('')}</div>`
+          :`<div class="q">فرمول (همراه با بار) این یون کدام است؟</div><div class="big" style="direction:rtl;font-size:34px">${nm}</div><div class="opts">${o.map(k=>optBtn(k,pf(k),1)).join('')}</div>`}}
   else if(mode=='name'){
    const z=it,p=pool(()=>1),fw=Math.random()<.5;cur={it,z,ans:z};
    const o=mix(q,it,[z,...shuffle(p.filter(x=>x!=z)).slice(0,3)],z);
@@ -370,7 +371,7 @@ $('#card').onclick=e=>{
    if(c===0)exp=`${nm} یون پایدار تشکیل نمی‌دهد؛ ترکیب‌های آن عمدتاً کووالانسی است.`;
    else if(z==1)exp=c>0?`هیدروژن با از دست دادن یک الکترون <b class="ion c">H<sup>+</sup></b> می‌شود (فقط در محلول آبی).`:`هیدروژن با گرفتن یک الکترون به آرایش <b>[He]</b> می‌رسد و در ترکیب با فلزها <b class="ion a">H<sup>−</sup></b> (هیدرید) می‌شود.`;
    else{const[ia,n]=ionA(z,c);exp=`${nm} با ${c>0?'از دست دادن':'گرفتن'} ${Math.abs(c)} الکترون به آرایش ${cfgSpan(fc(ia,n,1))} می‌رسد و ${c>0?'کاتیون':'آنیون'} <b class="ion ${c>0?'c':'a'}">${s}${sg(c)}</b> می‌شود.`}}
-  else if(mode=='poly'){const[f,nm,c]=POLY[cur.it];exp=`<b class="ion ${c>0?'c':'a'}">${fm(f)}${sg(c)}</b> = ${nm} (بار ${lab(c)})`}
+  else if(mode=='poly'){const[f,nm,c]=POLY[cur.i];exp=`<b class="ion ${c>0?'c':'a'}">${fm(f)}${sg(c)}</b> = ${nm} (بار ${lab(c)})`}
   else exp=`<b dir="ltr">${S[cur.z-1]}</b> = ${N[cur.z-1]} (عدد اتمی ${cur.z})`;
   fin(ok,exp)}
  if(b.id=='ok'){
