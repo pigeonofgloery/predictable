@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f6f7fa;--fg:#1b1d24;--mut:#6b7080;--card:#fff;--bd:#e3e5ec;--acc:#4f6bff;--L:92%;--S:80%}
-@media(prefers-color-scheme:dark){:root{--bg:#0e1016;--fg:#e8eaf2;--mut:#8f95a8;--card:#171a23;--bd:#2a2e3b;--L:21%;--S:45%}}
+:root{--bg:#f6f7fa;--fg:#1b1d24;--mut:#6b7080;--card:#fff;--bd:#e3e5ec;--acc:#4f6bff;--L:92%;--S:80%;--pb:#ffffffa8;--pa:#fffffff0}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1016;--fg:#e8eaf2;--mut:#8f95a8;--card:#171a23;--bd:#2a2e3b;--L:21%;--S:45%;--pb:#171a23a0;--pa:#171a23f2}}
 *{box-sizing:border-box;margin:0}
 body{font-family:Vazirmatn,Tahoma,sans-serif;background:var(--bg);color:var(--fg);padding:14px;min-height:100vh}
 header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;max-width:1400px;margin:0 auto 12px}
@@ -18,14 +18,14 @@ h1 span{color:var(--acc)}
 button,select{font:inherit;cursor:pointer;border:1px solid var(--bd);background:var(--card);color:var(--fg);border-radius:10px;padding:8px 14px;transition:.2s}
 button:hover{border-color:var(--acc);transform:translateY(-1px)}
 button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
-.wrap{max-width:1400px;margin:auto;overflow-x:auto;padding:8px 4px 18px;perspective:1200px}
+.wrap{max-width:1400px;margin:auto;overflow-x:auto;padding:12px 10px 18px;perspective:1200px}
 #pt{direction:ltr;display:grid;grid-template-columns:repeat(18,minmax(36px,1fr));gap:4px;min-width:700px}
 .el{aspect-ratio:1;border-radius:8px;background:hsl(var(--h) var(--S) var(--L));border:1px solid hsl(var(--h) 40% 55%/.35);
  display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;
  font-size:clamp(9px,1.1vw,13px);animation:in .5s backwards;transition:transform .2s,box-shadow .2s,opacity .25s}
 .el small{position:absolute;top:2px;left:4px;font-size:.62em;opacity:.65}
 .el b{font-size:1.45em;font-weight:800;line-height:1.1}
-.el i{font-style:normal;font-size:.55em;opacity:.8;display:none}
+.el i{font-style:normal;font-size:.55em;opacity:.8;display:none;max-width:96%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 @media(min-width:900px){.el i{display:block}}
 .el:hover{transform:translateZ(40px) scale(1.18);z-index:5;box-shadow:0 10px 24px #0004}
 .ph{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:.6em;color:var(--mut);border:1px dashed var(--bd);border-radius:8px}
@@ -35,18 +35,19 @@ button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 .lg span{padding:3px 10px;border-radius:99px;cursor:pointer;background:hsl(var(--h) var(--S) var(--L));border:1px solid transparent;transition:.2s}
 .lg span.a{border-color:var(--fg)}
 /* popup */
-#pop{position:fixed;z-index:50;width:340px;max-width:calc(100vw - 20px);background:var(--card);border:1px solid var(--bd);border-radius:18px;
- padding:14px;box-shadow:0 20px 50px #0005;pointer-events:none;opacity:0;transform:translateY(8px) scale(.97);transition:opacity .18s,transform .18s;font-size:13px}
+#pop{position:fixed;z-index:50;width:340px;max-width:calc(100vw - 20px);background:var(--pb);backdrop-filter:blur(8px) saturate(1.4);-webkit-backdrop-filter:blur(8px) saturate(1.4);border:1px solid var(--bd);border-radius:18px;
+ padding:14px;box-shadow:0 20px 50px #0004;pointer-events:none;opacity:0;transform:translateY(8px) scale(.97);transition:opacity .18s,transform .18s;font-size:13px}
 #pop.show{opacity:1;transform:none}
-@media(hover:none),(max-width:700px){#pop{left:10px!important;right:10px;top:auto!important;bottom:10px;width:auto;max-width:none;pointer-events:auto;max-height:72vh;overflow:auto}}
+@media(hover:none),(max-width:700px){#pop{background:var(--pa);left:10px!important;right:10px;top:auto!important;bottom:10px;width:auto;max-width:none;pointer-events:auto;max-height:72vh;overflow:auto}#pop .x{display:block}}
+.x{display:none;position:absolute;top:8px;left:10px;width:34px;height:34px;padding:0;border-radius:50%;font-size:20px;line-height:1}
 .hd{display:flex;gap:12px;align-items:center;margin-bottom:8px}
 .bohr{width:112px;height:112px;flex:none;perspective:320px}
 .bohr svg{width:100%;height:100%;animation:tilt 14s linear infinite;color:var(--mut)}
 @keyframes tilt{from{transform:rotateX(56deg) rotateY(-12deg) rotateZ(0)}to{transform:rotateX(56deg) rotateY(-12deg) rotateZ(360deg)}}
 @keyframes rot{to{transform:rotate(360deg)}}
 .bohr svg g{transform-origin:0 0}
-.nuc{animation:pl 1.6s ease-in-out infinite alternate}
-@keyframes pl{to{r:9}}
+.nuc{transform-box:fill-box;transform-origin:center;animation:pl 1.6s ease-in-out infinite alternate}
+@keyframes pl{to{transform:scale(1.3)}}
 .zz{font-size:12px;color:var(--mut)}
 .sy{font-size:38px;font-weight:800;line-height:1;direction:ltr;text-align:right}
 .nm{font-size:17px;font-weight:600}
@@ -79,6 +80,33 @@ button.bad{background:#ef4444;color:#fff;border-color:#ef4444}
 .lr{display:flex;gap:10px;justify-content:center;margin:12px 0;flex-wrap:wrap}
 .lr label{font-size:13px;color:var(--mut);display:flex;flex-direction:column;gap:4px}
 footer{text-align:center;color:var(--mut);font-size:12px;margin-top:6px}
+body.sh{padding-bottom:64vh}
+.el:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+/* detail page (desktop) */
+#dt{position:fixed;inset:0;z-index:80;background:#0007;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fi .25s}
+#dt[hidden]{display:none}
+@keyframes fi{from{opacity:0}}
+.dc{position:relative;width:min(760px,100%);max-height:94vh;overflow:auto;background:var(--pa);border:1px solid var(--bd);border-radius:24px;padding:28px 32px;font-size:15px;animation:pu .4s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes pu{from{transform:translateY(30px) scale(.94) rotateX(14deg);opacity:0}}
+.dc .hd{gap:26px}.dc .bohr{width:210px;height:210px}.dc .sy{font-size:68px}.dc .nm{font-size:26px}
+.dc .cfg{font-size:17px}.dc .lw{width:96px;height:96px}.dc .r{padding:7px 0}
+.dc .dx{position:absolute;top:14px;left:16px;width:36px;height:36px;padding:0;border-radius:50%;font-size:20px}
+.dn{display:flex;justify-content:space-between;margin-top:18px;direction:ltr}
+/* mobile */
+@media(max-width:700px){
+ body{padding:8px}body.sh{padding-bottom:62vh}
+ header{margin-bottom:8px}header button{padding:6px 10px;font-size:13px}
+ #pt{min-width:0;grid-template-columns:repeat(18,1fr);gap:2px}
+ .wrap{padding:4px 0 10px;overflow:visible}
+ .el{border-radius:4px;font-size:9px;border-width:.5px}
+ .el b{font-size:1.3em}.el small{font-size:5px;top:1px;left:2px}
+ .el:hover{transform:none;box-shadow:none}.ph{font-size:5px;border-radius:4px}
+ .lg{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px}.lg span{white-space:nowrap}
+ #pop{left:0!important;right:0;bottom:0!important;border-radius:20px 20px 0 0;padding:14px 16px 20px;max-height:62vh;font-size:13px}
+ #pop .hd{padding-right:0;margin-top:6px}.bohr{width:92px;height:92px}.sy{font-size:32px}.cfg{font-size:13px}
+ #qz{margin:4px auto}#card{padding:16px}.big{font-size:44px}.opts button{padding:14px 8px}
+ .tabs{gap:4px}.tabs button,.tabs select{padding:7px 9px;font-size:12px}
+}
 </style>
 </head>
 <body>
@@ -103,6 +131,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;margin-top:6px}
  <div id="stat"></div>
  <div id="card"></div>
 </section>
+<div id="dt" hidden><div class="dc" id="dc"></div></div>
 <div id="pop"></div>
 
 <script>
@@ -114,7 +143,8 @@ const ORD=['1s','2s','2p','3s','3p','4s','3d','4p','5s','4d','5p','6s','4f','5d'
 const CAP={s:2,p:6,d:10,f:14};
 const EXC={24:['4s','3d',1],29:['4s','3d',1],41:['5s','4d',1],42:['5s','4d',1],44:['5s','4d',1],45:['5s','4d',1],46:['5s','4d',2],47:['5s','4d',1],57:['4f','5d',1],58:['4f','5d',1],64:['4f','5d',1],78:['6s','5d',1],79:['6s','5d',1],89:['5f','6d',1],90:['5f','6d',2],91:['5f','6d',1],92:['5f','6d',1],93:['5f','6d',1],96:['5f','6d',1],103:['6d','7p',1]};
 const OV={1:[1,-1],6:[4,-4],14:[4,-4],15:[-3,3,5],22:[4],24:[3,6],25:[2,4,7],26:[2,3],27:[2,3],28:[2],29:[1,2],30:[2],32:[4],33:[-3,3],34:[-2],47:[1],48:[2],50:[2,4],51:[3,5],78:[2,4],79:[1,3],80:[1,2],81:[1,3],82:[2,4],83:[3],84:[2,4]};
-const $=s=>document.querySelector(s),rnd=a=>a[Math.random()*a.length|0],shuffle=a=>a.sort(()=>Math.random()-.5);
+let mode='ion',sc={r:0,w:0,s:0},cur={};
+const $=s=>document.querySelector(s),rnd=a=>a[Math.random()*a.length|0],shuffle=a=>{for(let i=a.length;i>1;){const j=Math.random()*i--|0;[a[i],a[j]]=[a[j],a[i]]}return a},pk=a=>{let z;do z=rnd(a);while(z==cur.z&&a.length>1);return z};
 const inL=(z,l)=>l.includes(z);
 
 function cat(z){
@@ -153,11 +183,11 @@ const lab=c=>(c>0?'+':'−')+Math.abs(c);
 function valence(z,a){
  const k=cat(z),c=pos(z)[1];
  if(z==2)return 2;
- if(k==2||k>=8){let v=0;[0,1,3,5,8,11,15].forEach(i=>{if(a[i])v=a[i]});return v}
+ if(k==2||k>=8)return a[ORD.indexOf(period(z)+'s')]
  return c<3?c:c-10}
 function lew(s,n,h){
  const sd=[0,0,0,0],P=[[0,-17],[17,0],[0,17],[-17,0]];let d='';
- for(let i=0;i<n&&i<8;i++)sd[i%4]++;
+ if(s=='He')sd[0]=2;else for(let i=0;i<n&&i<8;i++)sd[i%4]++;
  sd.forEach((m,k)=>{const[x,y]=P[k];for(let j=0;j<m;j++){const o=m==2?(j?5:-5):0;d+=`<circle cx="${k%2?x:x+o}" cy="${k%2?y+o:y}" r="2.7"/>`}});
  return`<svg viewBox="-30 -30 60 60" class="lw"><text y="1" text-anchor="middle" dominant-baseline="middle" font-size="18" font-weight="800" fill="currentColor">${s}</text><g fill="hsl(${h} 85% 50%)">${d}</g></svg>`}
 function bohr(a,h){
@@ -185,24 +215,44 @@ function info(z){
  <div class="ft"><div class="cf" style="margin:0">ساختار لوییس (نقطه‌ای)<br>${main?'نقطه = الکترون ظرفیت':'نقطه = الکترون s ظرفیت'}</div>${lew(s,v,h)}</div>`}
 
 /* build table */
-const pt=$('#pt'),pop=$('#pop');
+const pt=$('#pt'),pop=$('#pop'),DESK=()=>matchMedia('(hover:hover) and (min-width:701px)').matches;
 for(let z=1;z<=118;z++){
  const[r,c]=pos(z),k=cat(z),e=document.createElement('div');
- e.className='el';e.dataset.k=k;
+ e.className='el';e.dataset.k=k;e.tabIndex=0;e.onkeydown=ev=>{if(ev.key=='Enter'||ev.key==' '){ev.preventDefault();e.click()}};
  e.style.cssText=`--h:${CAT[k][1]};grid-row:${r};grid-column:${c};animation-delay:${(r+c)*28}ms`;
  e.innerHTML=`<small>${z}</small><b>${S[z-1]}</b><i>${N[z-1]}</i>`;
- e.onmouseenter=e.onclick=()=>show(z,e);
- e.onmouseleave=()=>{if(matchMedia('(hover:hover)').matches)pop.classList.remove('show')};
+ e.onmouseenter=()=>show(z,e);
+ e.onclick=()=>DESK()?openD(z):show(z,e);
+ e.onmouseleave=()=>{if(matchMedia('(hover:hover)').matches)hide()};
  pt.appendChild(e)}
 [[6,3,'57–71'],[7,3,'89–103']].forEach(([r,c,t])=>{const d=document.createElement('div');d.className='ph';d.style.cssText=`grid-row:${r};grid-column:${c}`;d.textContent=t;pt.appendChild(d)});
 function show(z,el){
- pop.innerHTML=info(z);pop.classList.add('show');
- if(matchMedia('(hover:none),(max-width:700px)').matches)return;
+ pop.innerHTML='<button class="x" onclick="hide()">×</button>'+info(z);pop.classList.add('show');
+ if(matchMedia('(hover:none),(max-width:700px)').matches){document.body.classList.add('sh');return}
  const r=el.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight;
  let x=Math.min(Math.max(10,r.left+r.width/2-w/2),innerWidth-w-10),y=r.bottom+10;
  if(y+h>innerHeight-10)y=Math.max(10,r.top-h-10);
  pop.style.left=x+'px';pop.style.top=y+'px'}
-document.addEventListener('click',e=>{if(!e.target.closest('.el,#pop'))pop.classList.remove('show')});
+function hide(){pop.classList.remove('show');document.body.classList.remove('sh')}
+document.addEventListener('click',e=>{if(!e.target.closest('.el,#pop'))hide()});
+/* detail page */
+function extra(z){
+ const a=cfg(z,z),sh=[];ORD.forEach((o,i)=>sh[o[0]-1]=(sh[o[0]-1]||0)+a[i]);
+ return`<div class="cf">آرایش کامل (به ترتیب پر شدن)</div><div class="cfg">${a.map((e,i)=>e?tok(i,e):'').join(' ')}</div>
+ <div class="r"><span>الکترون در لایه‌ها (K، L، M، …)</span><b dir="ltr">${sh.join(' · ')}</b></div>
+ <div class="r"><span>پروتون = الکترون (اتم خنثی)</span><b>${z}</b></div>
+ <div class="r"><span>نوترون (تقریبی)</span><b>${Math.round(M[z-1])-z}</b></div>`}
+function openD(z){
+ hide();const p=z>1?z-1:118,n=z<118?z+1:1;
+ $('#dc').innerHTML=`<button class="dx" onclick="closeD()">×</button>`+info(z)+extra(z)+`<div class="dn"><button onclick="openD(${p})">‹ ${S[p-1]}</button><button onclick="openD(${n})">${S[n-1]} ›</button></div>`;
+ $('#dt').hidden=false;document.body.style.overflow='hidden';$('#dt').dataset.z=z}
+function closeD(){$('#dt').hidden=true;document.body.style.overflow=''}
+$('#dt').onclick=e=>{if(e.target.id=='dt')closeD()};
+addEventListener('keydown',e=>{
+ if($('#dt').hidden)return;const z=+$('#dt').dataset.z;
+ if(e.key=='Escape')closeD();
+ if(e.key=='ArrowRight')openD(z<118?z+1:1);
+ if(e.key=='ArrowLeft')openD(z>1?z-1:118)});
 
 /* legend filter */
 let act=-1;
@@ -214,7 +264,7 @@ $('#lg').onclick=e=>{
  document.querySelectorAll('.el').forEach(x=>x.classList.toggle('dim',act>=0&&+x.dataset.k!=act))};
 
 /* flashcard / quiz */
-let mode='ion',sc={r:0,w:0,s:0},cur={};
+
 const pool=f=>{const m=+$('#rng').value,r=[];for(let z=1;z<=m;z++)if(f(z))r.push(z);return r};
 const isIon=z=>!OV[z]&&ions(z).length==1&&[0,1,3,5,6].includes(cat(z));
 const notF=z=>!(z>=57&&z<=71)&&!(z>=89&&z<=103);
@@ -222,15 +272,15 @@ function stat(){$('#stat').textContent=`درست: ${sc.r}  ·  غلط: ${sc.w}  
 function ask(){
  let h='',z;
  if(mode=='ion'){
-  z=rnd(pool(isIon));const c=ions(z)[0];cur={z,ans:c};
+  z=pk(pool(isIon));const c=ions(z)[0];cur={z,ans:c};
   const o=shuffle([c,...shuffle([1,2,3,-1,-2,-3].filter(x=>x!=c)).slice(0,3)]);
-  h=`<div class="q">بار یون پایدار این عنصر چند است؟</div><div class="big">${S[z-1]}</div><div class="sub">${N[z-1]} · Z=${z}</div><div class="opts">${o.map(x=>`<button data-v="${x}">${lab(x)}</button>`).join('')}</div>`}
+  h=`<div class="q">بار یون پایدار این عنصر چند است؟</div><div class="big">${S[z-1]}</div><div class="sub">${N[z-1]} · Z=${z}</div><div class="opts">${o.map(x=>`<button data-v="${x}" style="direction:ltr">${lab(x)}</button>`).join('')}</div>`}
  else if(mode=='name'){
-  const p=pool(()=>1),fw=Math.random()<.5;z=rnd(p);cur={z,ans:z};
+  const p=pool(()=>1),fw=Math.random()<.5;z=pk(p);cur={z,ans:z};
   const o=shuffle([z,...shuffle(p.filter(x=>x!=z)).slice(0,3)]);
   h=`<div class="q">${fw?'نام این نماد چیست؟':'نماد شیمیایی این عنصر کدام است؟'}</div><div class="big" style="${fw?'':'direction:rtl'}">${fw?S[z-1]:N[z-1]}</div><div class="opts">${o.map(x=>`<button data-v="${x}" style="${fw?'':'direction:ltr'}">${fw?N[x-1]:S[x-1]}</button>`).join('')}</div>`}
  else{
-  z=rnd(pool(notF));const[r,c]=pos(z);cur={z,r,c};
+  z=pk(pool(notF));const[r,c]=pos(z);cur={z,r,c};
   const op=n=>Array.from({length:n},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('');
   h=`<div class="q">عنصر شماره</div><div class="big">${z}</div><div class="sub">دوره و گروه آن کدام است؟</div>
   <div class="lr"><label>دوره<select id="sp">${op(7)}</select></label><label>گروه<select id="sg">${op(18)}</select></label></div><button id="ok" class="on">ثبت پاسخ</button>`}
@@ -248,17 +298,17 @@ $('#card').onclick=e=>{
   document.querySelectorAll('.opts button').forEach(x=>{x.disabled=true;if(+x.dataset.v==cur.ans)x.classList.add('good')});
   if(!ok)b.classList.add('bad');
   let exp;
-  if(mode=='ion'){const c=cur.ans,n=z-c;exp=`${N[z-1]} (${s}) با ${c>0?'از دست دادن':'گرفتن'} ${Math.abs(c)} الکترون به آرایش ${fc(cfg(n,0),n,1)} می‌رسد و ${c>0?'کاتیون':'آنیون'} <b>${s}${sg(c)}</b> می‌شود.`}
+  if(mode=='ion'){const c=cur.ans,n=z-c;exp=`${N[z-1]} (<bdi dir="ltr">${s}</bdi>) با ${c>0?'از دست دادن':'گرفتن'} ${Math.abs(c)} الکترون به آرایش <span class="cfg" style="display:inline-block;font-size:14px">${fc(cfg(n,0),n,1)}</span> می‌رسد و ${c>0?'کاتیون':'آنیون'} <b class="ion ${c>0?'c':'a'}">${s}${sg(c)}</b> می‌شود.`}
   else exp=`<b dir="ltr">${s}</b> = ${N[z-1]} (عدد اتمی ${z})`;
   fin(ok,exp)}
  if(b.id=='ok'){
   const p=+$('#sp').value,g=+$('#sg').value,ok=p==cur.r&&g==cur.c;
-  fin(ok,`${N[z-1]} (${s}): دوره <b>${cur.r}</b> و گروه <b>${cur.c}</b>.<br>دوره = تعداد لایه‌های الکترونی، گروه از الکترون‌های ظرفیت مشخص می‌شود.`)}};
+  fin(ok,`${N[z-1]} (<bdi dir="ltr">${s}</bdi>): دوره <b>${cur.r}</b> و گروه <b>${cur.c}</b>.<br>دوره = تعداد لایه‌های الکترونی، گروه از الکترون‌های ظرفیت مشخص می‌شود.`)}};
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
  mode=b.dataset.m;document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x==b));ask()});
 $('#rng').onchange=ask;
 $('#fl').onclick=function(){
- const q=$('#qz').hidden;$('#qz').hidden=!q;$('#tb').hidden=q;pop.classList.remove('show');
+ const q=$('#qz').hidden;$('#qz').hidden=!q;$('#tb').hidden=q;hide();
  this.classList.toggle('on',q);this.textContent=q?'🔬 بازگشت به جدول':'🎴 حالت فلش‌کارت';
  if(q)ask()};
 </script>
